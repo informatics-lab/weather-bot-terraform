@@ -1,0 +1,63 @@
+version: '2'
+
+services:
+
+  sol:
+    restart: always
+    image: quay.io/informaticslab/weather-bot:latest
+    volumes:
+      - /root/secrets.json:/usr/src/app/secrets.json
+    environment:
+      - VIRTUAL_HOST=sol.informaticslab.co.uk
+      - LETSENCRYPT_EMAIL=jacob.tomlinson@informaticslab.co.uk
+      - LETSENCRYPT_HOST=sol.informaticslab.co.uk
+    logging:
+      driver: awslogs
+      options:
+        awslogs-group: 'sol'
+        awslogs-stream: 'weather-bot'
+
+  nginx:
+    restart: always
+    image: jwilder/nginx-proxy:latest
+    ports:
+      - 80:80
+      - 443:443
+    volumes:
+      - /var/run/docker.sock:/tmp/docker.sock:ro
+      - /usr/share/nginx/html
+      - /etc/nginx/vhost.d
+      - /etc/nginx/certs:/etc/nginx/certs:ro
+    environment:
+      - HTTPS_METHOD=redirect
+
+  letsencrypt:
+    restart: always
+    image: jrcs/letsencrypt-nginx-proxy-companion:latest
+    volumes:
+     - /etc/nginx/certs:/etc/nginx/certs:rw
+     - /var/run/docker.sock:/var/run/docker.sock:ro
+    volumes_from:
+     - nginx
+
+  telegraf:
+    image: telegraf
+    restart: always
+    hostname: sol.informaticslab.co.uk
+    environment:
+      - HOST_PROC=/rootfs/proc
+      - HOST_SYS=/rootfs/sys
+      - HOST_ETC=/rootfs/etc
+    volumes:
+      - /srv/telegraf/telegraf.conf:/etc/telegraf/telegraf.conf:ro
+      - /var/run/docker.sock:/var/run/docker.sock:ro
+      - /sys:/rootfs/sys:ro
+      - /proc:/rootfs/proc:ro
+      - /etc:/rootfs/etc:ro
+
+  watchtower:
+    image: v2tec/watchtower
+    restart: always
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
+    command: --interval 30
