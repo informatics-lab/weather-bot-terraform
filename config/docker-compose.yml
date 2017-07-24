@@ -11,6 +11,7 @@ services:
       - VIRTUAL_HOST=sol.informaticslab.co.uk
       - LETSENCRYPT_EMAIL=jacob.tomlinson@informaticslab.co.uk
       - LETSENCRYPT_HOST=sol.informaticslab.co.uk
+      - ENVIRONMENT=production
     logging:
       driver: awslogs
       options:
