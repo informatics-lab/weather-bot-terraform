@@ -56,6 +56,26 @@ services:
       - /proc:/rootfs/proc:ro
       - /etc:/rootfs/etc:ro
 
+  filebeat:
+    image: docker.elastic.co/beats/filebeat:5.5.1
+    restart: always
+    hostname: sol.informaticslab.co.uk
+    user: root  # Must run as root to read docker logs
+    links:
+      - logstash 
+    volumes:
+      - /srv/filebeat/filebeat.yml:/usr/share/filebeat/filebeat.yml:ro
+      - /var/lib/docker/containers:/hostfs/var/lib/docker/containers:rw
+
+  logstash:
+    image: komljen/logstash
+    restart: always
+    hostname: sol.informaticslab.co.uk
+    environment:
+     - "LS_JAVA_OPTS=-Xmx256m -Xms256m"
+    volumes:
+      - /srv/logstash/logstash.conf:/usr/share/logstash/pipeline/logstash.conf:ro
+
   watchtower:
     image: v2tec/watchtower
     restart: always

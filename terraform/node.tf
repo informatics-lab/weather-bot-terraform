@@ -4,13 +4,15 @@ data "template_file" "bootstrap" {
     vars = {
       docker_compose_file = "${file("./config/docker-compose.yml")}"
       telegraf_config = "${file("./config/telegraf.conf")}"
+      filebeat_config = "${file("./config/filebeat.yml")}"
+      logstash_config = "${file("./config/logstash.conf")}"
       bot_secrets = "${file("./config/secrets.json")}"
     }
 }
 
 resource "aws_instance" "sol" {
   ami                   = "ami-f9dd458a"
-  instance_type         = "t2.micro"
+  instance_type         = "t2.small"
   key_name              = "gateway"
   user_data             = "${data.template_file.bootstrap.rendered}"
   iam_instance_profile  = "${aws_iam_instance_profile.sol.name}"

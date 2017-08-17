@@ -27,4 +27,16 @@ cat <<EOF > /srv/telegraf/telegraf.conf
 ${telegraf_config}
 EOF
 
+# Create filebeat config file
+mkdir -p /srv/filebeat/
+cat <<EOF > /srv/filebeat/filebeat.yml
+${filebeat_config}
+EOF
+
+# Create logstash config file
+mkdir -p /srv/logstash/
+cat <<EOF > /srv/logstash/logstash.conf
+${logstash_config}
+EOF
+
 /usr/local/bin/docker-compose -f /root/docker-compose.yml -p sol up -d
